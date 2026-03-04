@@ -2,7 +2,7 @@ import os
 from typing import Any, Dict, List, Optional
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
-from linkup import LinkUpClient
+from linkup import LinkupClient
 from crewai import Crew, Agent, Task, Process, LLM
 from crewai.tools import BaseTool
 
@@ -23,16 +23,16 @@ class LinkupSearchInput(BaseModel):
     output_type: str = Field(default="searchResults", description="Output type: 'searchResults' or 'sourcedAnswer' or 'structured'")
 
 class LinkupSearchTool(BaseTool):
-    name = "linkup_search"
-    description = "Search the web for information using LinkUp and return comprehensive results"
-    args_schema = LinkupSearchInput
+    name: str = "linkup_search"
+    description: str = "Search the web for information using LinkUp and return comprehensive results"
+    args_schema: type[BaseModel] = LinkupSearchInput
 
     def __init__(self):
         super().__init__()
 
     def run(self, query, depth="standard", output_type="searchResults"):
         try:
-            linkup_client = LinkUpClient(api_key=os.getenv("LINKUP_API_KEY"))
+            linkup_client = LinkupClient(api_key=os.getenv("LINKUP_API_KEY"))
             
             search_response = linkup_client.search(
                 query=query,
@@ -67,7 +67,6 @@ def create_research_crew(query):
         llm=client,
     )
 
-    # Define the technical writer
     technical_writer = Agent(
         role="Technical Writer",
         goal="Create well-structured, clear, and comprehensive responses in markdown format, with citations/source links (urls).",
@@ -77,7 +76,6 @@ def create_research_crew(query):
         llm=client,
     )
 
-    # Define tasks
     search_task = Task(
         description=f"Search for comprehensive information about: {query}.",
         agent=web_searcher,
